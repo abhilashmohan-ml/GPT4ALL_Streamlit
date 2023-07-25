@@ -18,13 +18,14 @@ def handle_userinput(user_question):
     
     st.write(bot_template.replace("{{MSG}}", response['result']), unsafe_allow_html=True)
 def get_conversation_chain(vectorstore):
-    model_path = "/run/media/abhilash/data2/models/ggml-gpt4all-j-v1.3-groovy.bin"
+    model_path = "/run/media/abhilash/data2/models/llama-2-13b-chat.ggmlv3.q8_0.bin"
     # llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":512})
     callbacks = [StreamingStdOutCallbackHandler()]
-    llm = GPT4All(model=model_path, max_tokens=600, backend="gptj", callbacks=callbacks,verbose=False)
+    llm = GPT4All(model=model_path, max_tokens=4096, backend="gptj", callbacks=callbacks,verbose=False)
     #memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
     conversation_chain= RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=vectorstore.as_retriever(), return_source_documents=True)
-    print (conversation_chain('what is processPAD')['result'])
+    #print (conversation_chain('what is processPAD')['result'])
+    print (conversation_chain)
     return conversation_chain
 def get_vectorstore(text_chunks):
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
@@ -32,8 +33,8 @@ def get_vectorstore(text_chunks):
     return vectorstore
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=250,
-        chunk_overlap=25,
+        chunk_size=1200,
+        chunk_overlap=50,
         )
     chunks = text_splitter.split_text(text)
     return chunks
